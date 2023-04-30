@@ -44,6 +44,10 @@ body {
   padding: 1rem;
 }
 
+.text:focus-visible {
+  outline: none;
+}
+
 .keyboard {
   display: flex;
   flex-direction: column;
