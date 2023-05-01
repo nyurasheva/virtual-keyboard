@@ -1,107 +1,228 @@
-const keyboard = [96, 49, 50, 51, 52, 53, 54, 55, 56, 57, 48, 45, 61, 8,
-  9, 113, 119, 101, 114, 116, 121, 117, 105, 111, 112, 91, 93, 92,
-  20, 97, 115, 100, 102, 103, 104, 106, 107, 108, 59, 222, 13,
-  160, 122, 120, 99, 118, 98, 110, 109, 44, 46, 47, 38, 161,
-  17, 18, 32, 18, 17, 37, 40, 39];
+import keyboard from './keyboard.js';
 
-const div = document.createElement('div');
-div.classList.add('klava');
-div.innerHTML = `<textarea id="area" class="text"></textarea>
+export default class KeyboardV {
+  constructor() {
+    this.lang = 'en';
+    this.div = null;
+    this.keyboardKey = null;
+    this.keyboard = keyboard;
+    this.capsClick = false;
+    this.shiftClick = false;
+    this.altClick = false;
+    this.ctrlClick = false;
+    this.area = null;
+    this.keyArr = [];
+    this.cursor = null;
+    this.rows = 1;
+  }
+
+  init() {
+    this.div = document.createElement('div');
+    this.div.classList.add('klava');
+    this.div.innerHTML = `<textarea id="area" class="text"></textarea>
+                <p class="description">Для переключения языка используйте левыe Ctrl + Alt</p>
                 <div class="keyboard"></div>`;
-document.body.prepend(div);
+    document.body.prepend(this.div);
 
-const area = document.querySelector('.text');
-const keyboardVirtual = document.querySelector('.keyboard');
+    if (localStorage.getItem('langStorage')) {
+      this.lang = localStorage.getItem('langStorage');
+    } else {
+      localStorage.setItem('langStorage', this.lang);
+    }
 
-const init = () => {
-  let out = '<div class="row">';
-  for (let i = 0; i < keyboard.length; i++) {
-    let key = String.fromCharCode(keyboard[i]);
-    let classK = 'key';
-    switch (keyboard[i]) {
-      case 8:
-        key = 'Backspace';
-        classK += ` ${key.toLowerCase()}`;
+    this.build();
+
+    // клавиатура нажатие
+    document.addEventListener('keydown', (event) => {
+      let key;
+      this.area.focus();
+      this.cursor = this.area.selectionStart;
+      const keyActive = document.querySelector(`.key[data-key="${event.code}"]`);
+      const keyCode = event.code;
+      if (keyCode !== 'ArrowUp' && keyCode !== 'ArrowDown') {
+        event.preventDefault();
+
+        this.keyboardKey.forEach((item) => {
+          if (item.dataset.key === keyCode) {
+            key = item.textContent;
+          }
+        });
+
+        if (this.keyArr.includes(keyCode)) {
+          if (keyCode === 'ShiftLeft' || keyCode === 'ShiftRight') {
+            this.keyboardKey.forEach((element) => element.classList.remove('active'));
+          }
+          keyActive.classList.add('active');
+          this.print(keyCode, key);
+        }
+      }
+    });
+
+    // клавиатура отпускание
+    document.addEventListener('keyup', (event) => {
+      const keyActive = document.querySelector(`.key[data-key="${event.code}"]`);
+      if (event.code === 'ShiftLeft' || event.code === 'ShiftRight') {
+        this.shiftClick = false;
+        this.build();
+      }
+      if (keyActive) keyActive.classList.remove('active');
+    });
+  }
+
+  build() {
+    this.keyArr = [];
+    const keyboardVirtual = document.querySelector('.keyboard');
+    let out = '<div class="row">';
+    this.keyboard.forEach((row) => {
+      out += '</div><div class="row">';
+      row.forEach((item) => {
+        let key;
+        this.keyArr.push(item.code);
+        let keyClass = (item.class) ? `key ${item.class}` : 'key';
+
+        if (this.capsClick || this.shiftClick) {
+          if (item.shift) key = item.shift[this.lang];
+          else if (item.class) key = item.key;
+          else key = (item.keyLang) ? item.keyLang[this.lang].toUpperCase() : item.key.toUpperCase();
+          if (this.capsClick) {
+            if (item.code === 'CapsLock') keyClass += ' active';
+          } else if (item.code === 'ShiftLeft' || item.code === 'ShiftRight') keyClass += ' active';
+        } else {
+          key = (item.keyLang) ? item.keyLang[this.lang] : item.key;
+        }
+
+        out += `<div class="${keyClass}" data-key=${item.code}><i>${key}</i></div>`;
+      });
+    });
+    keyboardVirtual.innerHTML = out;
+    this.area = document.querySelector('.text');
+    this.keyboardKey = document.querySelectorAll('.keyboard .key');
+    this.setMouseClick();
+  }
+
+  // мышка клик
+  setMouseClick() {
+    this.keyboardKey.forEach((element) => {
+      element.addEventListener('click', () => {
+        const keyCode = element.dataset.key;
+        const key = element.textContent;
+        this.cursor = this.area.selectionStart;
+
+        if (keyCode === 'ControlLeft') {
+          element.classList.add('active');
+          if (this.altClick) {
+            setTimeout(() => {
+              this.keyboardKey.forEach((e) => e.classList.remove('active'));
+            }, 300);
+          }
+        } else if (keyCode === 'AltLeft') {
+          element.classList.add('active');
+          if (this.ctrlClick) {
+            setTimeout(() => {
+              this.keyboardKey.forEach((e) => e.classList.remove('active'));
+            }, 300);
+          }
+        } else if (keyCode !== 'CapsLock' || keyCode !== 'ShiftLeft' || keyCode !== 'ShiftRight') {
+          element.classList.add('active');
+          setTimeout(() => {
+            element.classList.remove('active');
+          }, 300);
+        } else {
+          this.keyboardKey.forEach((e) => e.classList.remove('active'));
+          element.classList.add('active');
+        }
+
+        setTimeout(() => {
+          this.print(keyCode, key);
+        }, 200);
+      });
+    });
+  }
+
+  // заполнение textarea
+  print(keyCode, key) {
+    this.area.focus();
+    switch (keyCode) {
+      case 'ControlLeft':
+        if (this.altClick) {
+          this.langСhange();
+          this.altClick = !this.altClick;
+        } else this.ctrlClick = !this.ctrlClick;
         break;
-      case 9:
-        key = 'Tab';
-        classK += ` ${key.toLowerCase()}`;
+      case 'AltLeft':
+        if (this.ctrlClick) {
+          this.langСhange();
+          this.ctrlClick = !this.ctrlClick;
+        } else this.altClick = !this.altClick;
         break;
-      case 13:
-        key = 'Enter';
-        classK += ` ${key.toLowerCase()}`;
+      case 'Backspace':
+        this.area.value = this.area.value.slice(0, this.cursor - 1) + this.area.value.slice(this.cursor);
+        this.area.selectionStart = this.cursor - 1;
+        this.area.selectionEnd = this.cursor - 1;
         break;
-      case 160:
-        key = 'Shift';
-        classK += ` l-${key.toLowerCase()}`;
+      case 'Delete':
+        this.area.value = this.area.value.slice(0, this.cursor) + this.area.value.slice(this.cursor + 1);
+        this.area.selectionStart = this.cursor;
+        this.area.selectionEnd = this.cursor;
         break;
-      case 161:
-        key = 'Shift';
-        classK += ` r-${key.toLowerCase()}`;
+      case 'Tab':
+        this.area.value = `${this.area.value.slice(0, this.cursor)}  ${this.area.value.slice(this.cursor)}`;
+        this.area.selectionStart = this.cursor + 2;
+        this.area.selectionEnd = this.cursor + 2;
         break;
-      case 17:
-        key = 'Control';
-        classK += ` ${key.toLowerCase()}`;
+      case 'Enter':
+        this.area.value = `${this.area.value.slice(0, this.cursor)}\n${this.area.value.slice(this.cursor)}`;
+        this.area.selectionStart = this.cursor + 1;
+        this.area.selectionEnd = this.cursor + 1;
+        this.rows++;
         break;
-      case 18:
-        key = 'Alt';
-        classK += ` ${key.toLowerCase()}`;
+      case 'Space':
+        this.area.value = `${this.area.value.slice(0, this.cursor)} ${this.area.value.slice(this.cursor)}`;
+        this.area.selectionStart = this.cursor + 1;
+        this.area.selectionEnd = this.cursor + 1;
         break;
-      case 20:
-        key = 'Caps Lock';
-        classK += ` ${key.toLowerCase()}`;
+      case 'ArrowLeft':
+        this.area.selectionStart -= 1;
+        this.area.selectionEnd -= 1;
         break;
-      case 32:
-        key = '';
-        classK += ' space';
+      case 'ArrowUp':
+        this.area.selectionStart = 0;
+        this.area.selectionEnd = this.area.selectionStart;
         break;
-      case 37:
-        key = '◄';
+      case 'ArrowRight':
+        this.area.selectionStart += 1;
         break;
-      case 38:
-        key = '▲';
+      case 'ArrowDown':
+        this.area.selectionEnd = this.area.textLength;
+        this.area.selectionStart = this.area.selectionEnd;
         break;
-      case 39:
-        key = '►';
+      case 'CapsLock':
+        this.capsClick = !this.capsClick;
+        this.build();
         break;
-      case 40:
-        key = '▼';
+      case 'ShiftLeft':
+      case 'ShiftRight':
+        this.shiftClick = !this.shiftClick;
+        this.build();
+        break;
+      case 'ControlRight':
+      case 'AltRight':
+        this.area.value += '';
         break;
       default:
-        classK += ' char';
+        this.area.value = this.area.value.slice(0, this.cursor) + key + this.area.value.slice(this.cursor);
+        this.area.selectionStart = this.cursor + 1;
+        this.area.selectionEnd = this.cursor + 1;
     }
-    if (i === 14 || i === 28 || i === 41 || i === 54) {
-      out += '</div><div class="row">';
-    }
-    out += `<div class="${classK}" data-key=${keyboard[i]}><i>${key}</i></div>`;
   }
-  keyboardVirtual.innerHTML = out;
-};
 
-init();
+  langСhange() {
+    this.lang = (this.lang === 'en') ? 'ru' : 'en';
+    localStorage.setItem('langStorage', this.lang);
+    this.build();
+  }
+}
 
-const keyboardKey = document.querySelectorAll('.keyboard .key');
-
-window.addEventListener('DOMContentLoaded', () => {
-  // клавиатура нажатие
-  document.addEventListener('keydown', (event) => {
-    keyboardKey.forEach((element) => element.classList.remove('active'));
-    document.querySelector(`.keyboard .key[data-key="${event.key.charCodeAt()}"]`).classList.add('active');
-  });
-
-  // клавиатура отпускание
-  document.addEventListener('keyup', (event) => {
-    document.querySelector(`.keyboard .key[data-key="${event.key.charCodeAt()}"]`).classList.remove('active');
-  });
-
-  // мышка
-  keyboardKey.forEach((element) => {
-    element.addEventListener('click', () => {
-      keyboardKey.forEach((e) => e.classList.remove('active'));
-      element.classList.add('active');
-      const code = element.dataset.key;
-      const key = String.fromCharCode(code);
-      area.value += key;
-    });
-  });
+document.addEventListener('DOMContentLoaded', () => {
+  new KeyboardV(keyboard).init();
 });
