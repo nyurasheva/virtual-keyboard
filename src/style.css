@@ -10,7 +10,7 @@ body {
 }
 
 .klava {
-  padding: 3%;
+  padding: 1% 3%;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -18,14 +18,15 @@ body {
   justify-content: space-between;
 }
 
-.discription {
+.description {
   font-size: 1rem;
+  margin: 2rem 0;
 }
 
 .text {
   width: 100%;
   margin: 0 auto;
-  height: 200px;
+  min-height: 200px;
   box-shadow: 0.3rem 0.4rem 0.3rem rgba(60, 60, 60, 0.09),
     -0.4rem -0.8rem 1rem rgba(253, 224, 221, 0.8),
     inset -0.9rem -0.4rem 0.8rem rgba(253, 224, 221, 0.9),
@@ -143,7 +144,7 @@ body {
 }
 
 .tab {
-  width: 12%;
+  width: 11%;
   padding-top: 18px;
 }
 
@@ -167,7 +168,8 @@ body {
   padding-top: 18px;
 }
 
-.r-shift {
+.r-shift,
+.delete {
   width: 7%;
 }
 

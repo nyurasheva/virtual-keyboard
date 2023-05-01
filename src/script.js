@@ -12,13 +12,15 @@ export default class KeyboardV {
     this.ctrlClick = false;
     this.area = null;
     this.keyArr = [];
+    this.cursor = null;
+    this.rows = 1;
   }
 
   init() {
     this.div = document.createElement('div');
     this.div.classList.add('klava');
     this.div.innerHTML = `<textarea id="area" class="text"></textarea>
-                <p class="discription">Для переключения используйте левыe Ctrl + Alt</p>
+                <p class="description">Для переключения языка используйте левыe Ctrl + Alt</p>
                 <div class="keyboard"></div>`;
     document.body.prepend(this.div);
 
@@ -34,21 +36,25 @@ export default class KeyboardV {
     document.addEventListener('keydown', (event) => {
       let key;
       this.area.focus();
-      event.preventDefault();
+      this.cursor = this.area.selectionStart;
       const keyActive = document.querySelector(`.key[data-key="${event.code}"]`);
       const keyCode = event.code;
-      this.keyboardKey.forEach((item) => {
-        if (item.dataset.key === keyCode) {
-          key = item.textContent;
-        }
-      });
+      if (keyCode !== 'ArrowUp' && keyCode !== 'ArrowDown') {
+        event.preventDefault();
 
-      if (this.keyArr.includes(keyCode)) {
-        if (keyCode === 'ShiftLeft' || keyCode === 'ShiftRight') {
-          this.keyboardKey.forEach((element) => element.classList.remove('active'));
+        this.keyboardKey.forEach((item) => {
+          if (item.dataset.key === keyCode) {
+            key = item.textContent;
+          }
+        });
+
+        if (this.keyArr.includes(keyCode)) {
+          if (keyCode === 'ShiftLeft' || keyCode === 'ShiftRight') {
+            this.keyboardKey.forEach((element) => element.classList.remove('active'));
+          }
+          keyActive.classList.add('active');
+          this.print(keyCode, key);
         }
-        keyActive.classList.add('active');
-        this.print(keyCode, key);
       }
     });
 
@@ -80,7 +86,7 @@ export default class KeyboardV {
           else key = (item.keyLang) ? item.keyLang[this.lang].toUpperCase() : item.key.toUpperCase();
           if (this.capsClick) {
             if (item.code === 'CapsLock') keyClass += ' active';
-          } else if (item.code === 'ShiftLeft') keyClass += ' active';
+          } else if (item.code === 'ShiftLeft' || item.code === 'ShiftRight') keyClass += ' active';
         } else {
           key = (item.keyLang) ? item.keyLang[this.lang] : item.key;
         }
@@ -100,6 +106,7 @@ export default class KeyboardV {
       element.addEventListener('click', () => {
         const keyCode = element.dataset.key;
         const key = element.textContent;
+        this.cursor = this.area.selectionStart;
 
         if (keyCode === 'ControlLeft') {
           element.classList.add('active');
@@ -115,7 +122,7 @@ export default class KeyboardV {
               this.keyboardKey.forEach((e) => e.classList.remove('active'));
             }, 300);
           }
-        } else if (keyCode !== 'CapsLock' || keyCode !== 'ShiftLeft') {
+        } else if (keyCode !== 'CapsLock' || keyCode !== 'ShiftLeft' || keyCode !== 'ShiftRight') {
           element.classList.add('active');
           setTimeout(() => {
             element.classList.remove('active');
@@ -149,16 +156,30 @@ export default class KeyboardV {
         } else this.altClick = !this.altClick;
         break;
       case 'Backspace':
-        this.area.value = this.area.value.slice(0, -1);
+        this.area.value = this.area.value.slice(0, this.cursor - 1) + this.area.value.slice(this.cursor);
+        this.area.selectionStart = this.cursor - 1;
+        this.area.selectionEnd = this.cursor - 1;
+        break;
+      case 'Delete':
+        this.area.value = this.area.value.slice(0, this.cursor) + this.area.value.slice(this.cursor + 1);
+        this.area.selectionStart = this.cursor;
+        this.area.selectionEnd = this.cursor;
         break;
       case 'Tab':
-        this.area.value += '  ';
+        this.area.value = `${this.area.value.slice(0, this.cursor)}  ${this.area.value.slice(this.cursor)}`;
+        this.area.selectionStart = this.cursor + 2;
+        this.area.selectionEnd = this.cursor + 2;
         break;
       case 'Enter':
-        this.area.value += '\n';
+        this.area.value = `${this.area.value.slice(0, this.cursor)}\n${this.area.value.slice(this.cursor)}`;
+        this.area.selectionStart = this.cursor + 1;
+        this.area.selectionEnd = this.cursor + 1;
+        this.rows++;
         break;
       case 'Space':
-        this.area.value += ' ';
+        this.area.value = `${this.area.value.slice(0, this.cursor)} ${this.area.value.slice(this.cursor)}`;
+        this.area.selectionStart = this.cursor + 1;
+        this.area.selectionEnd = this.cursor + 1;
         break;
       case 'ArrowLeft':
         this.area.selectionStart -= 1;
@@ -170,10 +191,8 @@ export default class KeyboardV {
         break;
       case 'ArrowRight':
         this.area.selectionStart += 1;
-        this.area.selectionEnd += 1;
         break;
       case 'ArrowDown':
-        this.area.value += '';
         this.area.selectionEnd = this.area.textLength;
         this.area.selectionStart = this.area.selectionEnd;
         break;
@@ -182,22 +201,24 @@ export default class KeyboardV {
         this.build();
         break;
       case 'ShiftLeft':
+      case 'ShiftRight':
         this.shiftClick = !this.shiftClick;
         this.build();
         break;
-      case 'ShiftRight':
       case 'ControlRight':
       case 'AltRight':
         this.area.value += '';
         break;
       default:
-        this.area.value += key;
+        this.area.value = this.area.value.slice(0, this.cursor) + key + this.area.value.slice(this.cursor);
+        this.area.selectionStart = this.cursor + 1;
+        this.area.selectionEnd = this.cursor + 1;
     }
   }
 
   langСhange() {
     this.lang = (this.lang === 'en') ? 'ru' : 'en';
-    localStorage.setItem('language', this.lang);
+    localStorage.setItem('langStorage', this.lang);
     this.build();
   }
 }

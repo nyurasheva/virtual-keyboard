@@ -2,8 +2,8 @@ const keyboard = [
   [
     {
       code: 'Backquote',
-      keyLang: { en: '`', ru: "'" },
-      shift: { en: '~', ru: '[' },
+      keyLang: { en: '`', ru: 'ё' },
+      shift: { en: '~', ru: 'Ё' },
     },
     {
       code: 'Digit1',
@@ -128,9 +128,9 @@ const keyboard = [
       shift: { en: '}', ru: 'Ъ' },
     },
     {
-      code: 'Backslash',
-      keyLang: { en: '\\', ru: 'ё' },
-      shift: { en: '|', ru: 'Ё' },
+      code: 'Delete',
+      key: 'Del',
+      class: 'delete',
     },
   ],
   [
