@@ -1,97 +1,168 @@
 import keyboard from './keyboard.js';
 
-const div = document.createElement('div');
-div.classList.add('klava');
-div.innerHTML = `<textarea id="area" class="text" disabled></textarea>
+export default class KeyboardV {
+  constructor() {
+    this.lang = 'en';
+    this.div = null;
+    this.keyboard = keyboard;
+    this.capsClick = false;
+    this.shiftClick = false;
+    this.area = null;
+    this.keyArr = [];
+  }
+
+  init() {
+    this.div = document.createElement('div');
+    this.div.classList.add('klava');
+    this.div.innerHTML = `<textarea id="area" class="text"></textarea>
+                <p class="discription">Для переключения используйте левыe Ctrl + Alt</p>
                 <div class="keyboard"></div>`;
-document.body.prepend(div);
+    document.body.prepend(this.div);
 
-const area = document.querySelector('.text');
-const keyboardVirtual = document.querySelector('.keyboard');
-let lang = 'en';
-let lowerCase = true;
+    if (localStorage.getItem('langStorage')) {
+      this.lang = localStorage.getItem('langStorage');
+    } else {
+      localStorage.setItem('langStorage', this.lang);
+    }
 
-const getLang = () => {
-  console.log(lang);
-  if (localStorage.getItem('langStorage')) {
-    lang = localStorage.getItem('langStorage');
-  }
-  console.log(lang);
-};
+    // document.addEventListener('keydown', (event) => {
+    //   if (event.getModifierState('CapsLock')) {
+    //     this.capsClick = false;
+    //     this.build();
+    //   }
+    // });
 
-getLang();
+    this.build();
 
-const init = () => {
-  let out = '<div class="row">';
-  keyboard.forEach((row) => {
-    out += '</div><div class="row">';
-    row.forEach((item) => {
-      let key;
-      if (lowerCase === true) {
-        key = (item.keyLang) ? item.keyLang[lang] : item.key;
-      } else {
-        key = (item.keyLang) ? item.keyLang[lang].toUpperCase() : item.key.toUpperCase();
+    this.area = document.querySelector('.text');
+    const keyboardKey = document.querySelectorAll('.keyboard .key');
+
+    // клавиатура нажатие
+    document.addEventListener('keydown', (event) => {
+      this.area.focus();
+      event.preventDefault();
+      const keyActive = document.querySelector(`.key[data-key="${event.code}"]`);
+      const { key } = event;
+      const keyCode = event.code;
+      if (this.keyArr.includes(keyCode)) {
+        keyboardKey.forEach((element) => element.classList.remove('active'));
+        keyActive.classList.add('active');
+        this.print(keyCode, key);
       }
-      const keyClass = (item.class) ? `key ${item.class}` : 'key';
-      out += `<div class="${keyClass}" data-key=${item.code}><i>${key}</i></div>`;
     });
-  });
-  keyboardVirtual.innerHTML = out;
-};
 
-init();
-
-const keyboardKey = document.querySelectorAll('.keyboard .key');
-
-// клавиатура нажатие
-document.addEventListener('keydown', (event) => {
-  area.focus();
-  console.log(event);
-  const keyActive = document.querySelector(`.key[data-key="${event.code}"]`);
-  keyboardKey.forEach((element) => element.classList.remove('active'));
-  keyActive.classList.add('active');
-
-  if (event.code === 'ControlLeft') {
-    document.addEventListener('keyup', (e) => {
-      if (e.code === 'AltLeft') {
-        lang = (lang === 'en') ? 'ru' : 'en';
-        init();
-      } else document.onkeyup = null;
+    // клавиатура отпускание
+    document.addEventListener('keyup', (event) => {
+      const keyActive = document.querySelector(`.key[data-key="${event.code}"]`);
+      // if (event.code === 'Caps Lock') console.log('12');
+      if (keyActive) keyActive.classList.remove('active');
     });
-  } else if (event.code === 'ShiftLeft') {
-    document.addEventListener('keyup', (e) => {
-      area.value += e.key;
-    });
-  } else if (event.code === 'CapsLock') {
-    lowerCase = !lowerCase;
-    init();
-    area.value += event.key.toUpperCase();
-  } else area.value += event.key;
-});
 
-// клавиатура отпускание
-document.addEventListener('keyup', (event) => {
-  const keyActive = document.querySelector(`.key[data-key="${event.code}"]`);
-  keyActive.classList.remove('active');
-  if (event.code === 'CapsLock') {
-    lowerCase = !lowerCase;
-    init();
+    // мышка нажатие
+    keyboardKey.forEach((element) => {
+      element.addEventListener('click', () => {
+        keyboardKey.forEach((e) => e.classList.remove('active'));
+        element.classList.add('active');
+        const key = element.textContent;
+        const keyCode = element.dataset.key;
+        if (keyCode !== 'Caps Lock' || keyCode !== 'ShiftLeft') {
+          setTimeout(() => {
+            element.classList.remove('active');
+          }, 300);
+        }
+        this.print(keyCode, key);
+      });
+    });
   }
+
+  build() {
+    this.keyArr = [];
+    const keyboardVirtual = document.querySelector('.keyboard');
+    let out = '<div class="row">';
+    this.keyboard.forEach((row) => {
+      out += '</div><div class="row">';
+      row.forEach((item) => {
+        let key;
+        this.keyArr.push(item.code);
+        const keyClass = (item.class) ? `key ${item.class}` : 'key';
+
+        if (this.capsClick || this.shiftClick) {
+          if (item.shift) key = item.shift[this.lang];
+          else if (item.class) key = item.key;
+          else key = (item.keyLang) ? item.keyLang[this.lang].toUpperCase() : item.key.toUpperCase();
+        } else {
+          key = (item.keyLang) ? item.keyLang[this.lang] : item.key;
+        }
+
+        out += `<div class="${keyClass}" data-key=${item.code}><i>${key}</i></div>`;
+      });
+    });
+    keyboardVirtual.innerHTML = out;
+  }
+
+  // заполнение textarea
+  print(keyCode, key) {
+    this.area.focus();
+    switch (keyCode) {
+      case 'ControlLeft':
+        document.addEventListener('keyup', (e) => {
+          if (e.code === 'AltLeft') {
+            this.langСhange();
+          } else document.onkeyup = null;
+        });
+        break;
+      case 'Backspace':
+        this.area.value = this.area.value.slice(0, -1);
+        break;
+      case 'Tab':
+        this.area.value += '  ';
+        break;
+      case 'Enter':
+        this.area.value += '\n';
+        break;
+      case 'Space':
+        this.area.value += ' ';
+        break;
+      case 'ArrowLeft':
+        this.area.value += '';
+        this.area.selectionStart -= 1;
+        this.area.selectionEnd -= 1;
+        break;
+      case '▲':
+        break;
+      case 'ArrowRight':
+        this.area.value += '';
+        this.area.selectionStart += 1;
+        this.area.selectionEnd += 1;
+        break;
+      case '▼':
+        break;
+      case 'CapsLock':
+        this.capsClick = !this.capsClick;
+        this.build();
+        break;
+      case 'ShiftLeft':
+        this.shiftClick = !this.shiftClick;
+        this.build();
+        break;
+      case 'ShiftRight':
+      case 'ControlRight':
+      case 'AltLeft':
+      case 'AltRight':
+        this.area.value += '';
+        break;
+      default:
+        this.area.value += key;
+    }
+  }
+
+  langСhange() {
+    this.lang = (this.lang === 'en') ? 'ru' : 'en';
+    localStorage.setItem('language', this.lang);
+    this.build();
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  new KeyboardV(keyboard).init();
 });
-
-// мышка клик по кнопке
-keyboardKey.forEach((element) => {
-  element.addEventListener('click', () => {
-    keyboardKey.forEach((e) => e.classList.remove('active'));
-    element.classList.add('active');
-    const key = element.textContent;
-    area.value += key;
-  });
-});
-
-// настройки приложения сохраняются при перезагрузке страницы
-const setLocalStorage = () => {
-  localStorage.setItem('langStorage', lang);
-};
-
-window.addEventListener('beforeunload', setLocalStorage);

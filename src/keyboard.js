@@ -3,67 +3,77 @@ const keyboard = [
     {
       code: 'Backquote',
       keyLang: { en: '`', ru: "'" },
-      shift: '~',
+      shift: { en: '~', ru: '[' },
     },
     {
       code: 'Digit1',
       key: '1',
+      shift: { en: '!', ru: '!' },
     },
     {
       code: 'Digit2',
       key: '2',
+      shift: { en: '@', ru: '"' },
     },
     {
       code: 'Digit3',
       key: '3',
+      shift: { en: '#', ru: '№' },
     },
     {
       code: 'Digit4',
       key: '4',
+      shift: { en: '$', ru: '%' },
     },
     {
       code: 'Digit5',
       key: '5',
+      shift: { en: '%', ru: ':' },
     },
     {
       code: 'Digit6',
       key: '6',
+      shift: { en: '^', ru: ',' },
     },
     {
       code: 'Digit7',
       key: '7',
+      shift: { en: '&', ru: '.' },
     },
     {
       code: 'Digit8',
       key: '8',
+      shift: { en: '*', ru: ';' },
     },
     {
       code: 'Digit9',
       key: '9',
+      shift: { en: '(', ru: '(' },
     },
     {
       code: 'Digit0',
       key: '0',
+      shift: { en: ')', ru: ')' },
     },
     {
       code: 'Minus',
       key: '-',
+      shift: { en: '_', ru: '_' },
     },
     {
       code: 'Equal',
       key: '=',
+      shift: { en: '+', ru: '+' },
     },
     {
       code: 'Backspace',
-      func: true,
       key: '⌫ Back',
-      class: 'delete',
+      class: 'backspace',
     },
   ],
   [
     {
       code: 'Tab',
-      func: true,
       key: '↹ Tab',
       class: 'tab',
     },
@@ -110,22 +120,24 @@ const keyboard = [
     {
       code: 'BracketLeft',
       keyLang: { en: '[', ru: 'х' },
+      shift: { en: '{', ru: 'Х' },
     },
     {
       code: 'BracketRight',
       keyLang: { en: ']', ru: 'ъ' },
+      shift: { en: '}', ru: 'Ъ' },
     },
     {
       code: 'Backslash',
-      keyLang: { en: '\\', ru: '\\' },
+      keyLang: { en: '\\', ru: 'ё' },
+      shift: { en: '|', ru: 'Ё' },
     },
   ],
   [
     {
       code: 'CapsLock',
-      func: true,
       key: '🅰 Caps Lock',
-      class: 'delete',
+      class: 'caps',
     },
     {
       code: 'KeyA',
@@ -166,14 +178,15 @@ const keyboard = [
     {
       code: 'Semicolon',
       keyLang: { en: ';', ru: 'ж' },
+      shift: { en: ':', ru: 'Ж' },
     },
     {
       code: 'Quote',
       keyLang: { en: "'", ru: 'э' },
+      shift: { en: '"', ru: 'Э' },
     },
     {
       code: 'Enter',
-      func: true,
       key: '↩ Enter',
       class: 'enter',
     },
@@ -181,7 +194,6 @@ const keyboard = [
   [
     {
       code: 'ShiftLeft',
-      func: true,
       key: '⇧ Shift',
       class: 'l-shift',
     },
@@ -216,36 +228,37 @@ const keyboard = [
     {
       code: 'Comma',
       keyLang: { en: ',', ru: 'б' },
+      shift: { en: '<', ru: 'Б' },
     },
     {
       code: 'Period',
       keyLang: { en: '.', ru: 'ю' },
+      shift: { en: '>', ru: 'Ю' },
     },
     {
       code: 'Slash',
       keyLang: { en: '/', ru: '.' },
+      shift: { en: '?', ru: '?' },
     },
     {
       code: 'ArrowUp',
-      func: true,
       key: '▲',
+      class: 'arrow-up',
     },
     {
       code: 'ShiftRight',
-      func: true,
-      key: '⇧ Shift',
+      key: 'Shift',
+      class: 'r-shift',
     },
   ],
   [
     {
       code: 'ControlLeft',
-      func: true,
       key: 'Ctrl',
       class: 'control',
     },
     {
       code: 'AltLeft',
-      func: true,
       key: 'Alt',
       class: 'alt',
     },
@@ -256,30 +269,28 @@ const keyboard = [
     },
     {
       code: 'AltRight',
-      func: true,
       key: 'Alt',
       class: 'alt',
     },
     {
       code: 'ControlRight',
-      func: true,
       key: 'Ctrl',
       class: 'control',
     },
     {
       code: 'ArrowLeft',
-      func: true,
       key: '◄',
+      class: 'arrow-left',
     },
     {
       code: 'ArrowDown',
-      func: true,
       key: '▼',
+      class: 'arrow-down',
     },
     {
       code: 'ArrowRight',
-      func: true,
       key: '►',
+      class: 'arrow-right',
     },
   ],
 ];

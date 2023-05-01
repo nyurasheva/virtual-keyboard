@@ -6,11 +6,20 @@
 
 body {
   background-color: #fde0dd;
-  font-family: sans-serif;
+  font-family: Arial, sans-serif;
 }
 
 .klava {
   padding: 3%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.discription {
+  font-size: 1rem;
 }
 
 .text {
@@ -51,10 +60,10 @@ body {
 .keyboard {
   display: flex;
   flex-direction: column;
+  width: 100%;
   padding: 5px;
   border-radius: 4px;
   position: relative;
-  margin: 100px auto 50px;
   padding: 20px 20px;
   border-radius: 10px;
   padding: 1rem;
@@ -133,35 +142,67 @@ body {
   clear: both;
 }
 
-.delete {
-  width: auto;
-}
-
 .tab {
   width: 12%;
+  padding-top: 18px;
 }
 
 .backspace {
   width: 12%;
+  padding-top: 18px;
 }
 
 .enter {
   width: 11%;
+  padding-top: 18px;
 }
 
-.caps.lock {
-  width: 14%;
+.caps {
+  width: 15%;
+  padding-top: 18px;
 }
 
 .l-shift {
-  width: 19%;
+  width: 18%;
+  padding-top: 18px;
+}
+
+.r-shift {
+  width: 7%;
 }
 
 .space {
   width: 44%;
+  padding-top: 18px;
 }
 
 .control,
 .alt {
   width: 8%;
+  padding-top: 18px;
+}
+
+.arrow-up {
+  width: 7%;
+  padding: 15px;
+  justify-content: center;
+  align-items: center;
+}
+
+.arrow-left {
+  width: 7%;
+  padding: 15px;
+  justify-content: center;
+}
+
+.arrow-down {
+  width: 7%;
+  padding: 15px;
+  justify-content: center;
+  align-items: baseline;
+}
+
+.arrow-right {
+  width: 7%;
+  padding: 15px;
 }
