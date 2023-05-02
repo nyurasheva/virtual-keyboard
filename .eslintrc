@@ -19,5 +19,15 @@
       }
     ],
     "no-alert": "off"
-  }
+  },
+  "overrides": [
+    {
+      "files": [
+        "*.js"
+      ],
+      "rules": {
+        "import/extensions": "off"
+      }
+    }
+  ]
 }
