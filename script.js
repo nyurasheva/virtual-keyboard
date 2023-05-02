@@ -104,12 +104,15 @@ export default class KeyboardV {
         } else {
           key = (item.keyLang) ? item.keyLang[this.lang] : item.key;
         }
+
+        if (this.altClick || this.ctrlClick) {
+          if (item.code === 'AltLeft') keyClass += ' active';
+          else if (item.code === 'ControlLeft') keyClass += ' active';
+        }
         out += `<div class="${keyClass}" data-key=${item.code}><i>${key}</i></div>`;
       });
     });
-    console.log(out);
     keyboardVirtual.innerHTML = out;
-    console.log(keyboardVirtual);
     this.area = document.querySelector('.text');
     this.keyboardKey = document.querySelectorAll('.keyboard .key');
     this.setMouseClick();
@@ -124,7 +127,9 @@ export default class KeyboardV {
         this.cursor = this.area.selectionStart;
 
         if (keyCode === 'ControlLeft') {
-          element.classList.add('active');
+          if (!this.ctrlClick) element.classList.add('active');
+          else element.classList.remove('active');
+
           if (this.altClick) {
             setTimeout(() => {
               this.keyboardKey.forEach((e) => e.classList.remove('active'));
@@ -132,7 +137,8 @@ export default class KeyboardV {
             }, 300);
           }
         } else if (keyCode === 'AltLeft') {
-          element.classList.add('active');
+          if (!this.altClick) element.classList.add('active');
+          else element.classList.remove('active');
           if (this.ctrlClick) {
             setTimeout(() => {
               this.keyboardKey.forEach((e) => e.classList.remove('active'));
@@ -155,11 +161,15 @@ export default class KeyboardV {
           }, 300);
         }
 
-        this.capsOn();
+        if (this.altClick && this.ctrlClick) {
+          this.keyboardKey.forEach((e) => e.classList.remove('active'));
+        }
 
-        setTimeout(() => {
-          this.print(keyCode, key);
-        }, 200);
+        this.capsOn();
+        this.print(keyCode, key);
+        // setTimeout(() => {
+
+        // }, 200);
       });
     });
   }
