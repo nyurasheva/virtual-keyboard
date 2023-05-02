@@ -8,6 +8,7 @@ export default class KeyboardV {
     this.keyboard = keyboard;
     this.capsClick = false;
     this.shiftClick = false;
+    this.shiftKey = null;
     this.altClick = false;
     this.ctrlClick = false;
     this.area = null;
@@ -51,6 +52,7 @@ export default class KeyboardV {
         if (this.keyArr.includes(keyCode)) {
           if (keyCode === 'ShiftLeft' || keyCode === 'ShiftRight') {
             this.keyboardKey.forEach((element) => element.classList.remove('active'));
+            this.shiftKey = keyCode;
           }
           keyActive.classList.add('active');
           this.print(keyCode, key);
@@ -79,14 +81,16 @@ export default class KeyboardV {
         let key;
         this.keyArr.push(item.code);
         let keyClass = (item.class) ? `key ${item.class}` : 'key';
-
+        console.log(this.capsClick);
         if (this.capsClick || this.shiftClick) {
           if (item.shift) key = item.shift[this.lang];
           else if (item.class) key = item.key;
           else key = (item.keyLang) ? item.keyLang[this.lang].toUpperCase() : item.key.toUpperCase();
           if (this.capsClick) {
             if (item.code === 'CapsLock') keyClass += ' active';
-          } else if (item.code === 'ShiftLeft' || item.code === 'ShiftRight') keyClass += ' active';
+          } else if (item.code === this.shiftKey) {
+            keyClass += ' active';
+          }
         } else {
           key = (item.keyLang) ? item.keyLang[this.lang] : item.key;
         }
@@ -122,14 +126,24 @@ export default class KeyboardV {
               this.keyboardKey.forEach((e) => e.classList.remove('active'));
             }, 300);
           }
-        } else if (keyCode !== 'CapsLock' || keyCode !== 'ShiftLeft' || keyCode !== 'ShiftRight') {
+        } else if (keyCode === 'ShiftLeft' || keyCode === 'ShiftRight') {
+          this.keyboardKey.forEach((e) => e.classList.remove('active'));
+          element.classList.add('active');
+          if (this.shiftClick && keyCode === this.shiftKey) {
+            element.classList.remove('active');
+          }
+        } else if (keyCode === 'CapsLock') {
+          this.keyboardKey.forEach((e) => e.classList.remove('active'));
+          element.classList.add('active');
+        } else {
           element.classList.add('active');
           setTimeout(() => {
             element.classList.remove('active');
           }, 300);
-        } else {
-          this.keyboardKey.forEach((e) => e.classList.remove('active'));
-          element.classList.add('active');
+        }
+
+        if (this.capsClick) {
+          document.querySelector('.key[data-key="CapsLock"]').classList.add('active');
         }
 
         setTimeout(() => {
@@ -202,8 +216,20 @@ export default class KeyboardV {
         break;
       case 'ShiftLeft':
       case 'ShiftRight':
-        this.shiftClick = !this.shiftClick;
-        this.build();
+        if (this.shiftKey === keyCode && this.shiftClick && !this.capsClick) {
+          this.shiftClick = !this.shiftClick;
+          this.shiftKey = null;
+          this.build();
+        } else if (!this.shiftClick && !this.capsClick) {
+          this.shiftClick = !this.shiftClick;
+          this.shiftKey = keyCode;
+          this.build();
+        } else if (this.capsClick) {
+          this.shiftClick = !this.shiftClick;
+          this.shiftKey = keyCode;
+        } else if (this.shiftKey !== keyCode) {
+          this.shiftKey = keyCode;
+        }
         break;
       case 'ControlRight':
       case 'AltRight':
