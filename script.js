@@ -21,7 +21,7 @@ export default class KeyboardV {
     this.div = document.createElement('div');
     this.div.classList.add('klava');
     this.div.innerHTML = `<textarea id="area" class="text"></textarea>
-                <p class="description">Для переключения языка используйте левыe Ctrl + Alt</p>
+                <p class="description">Для переключения языка используйте левыe Ctrl + Alt. Клавиатура создана в операционной системе macOS.</p>
                 <div class="keyboard"></div>`;
     document.body.prepend(this.div);
 
@@ -167,9 +167,6 @@ export default class KeyboardV {
 
         this.capsOn();
         this.print(keyCode, key);
-        // setTimeout(() => {
-
-        // }, 200);
       });
     });
   }
@@ -178,6 +175,32 @@ export default class KeyboardV {
     if (this.capsClick) {
       document.querySelector('.key[data-key="CapsLock"]').classList.add('active');
     }
+  }
+
+  // перемещание курсора вверх-вниз
+  arrowArea(keyCode) {
+    let arr = [];
+    const arrLeng = [];
+    let rowArea = 0;
+    let cursorNew = this.cursor;
+    arr = this.area.value.split('\n');
+    arr.forEach((e, i) => {
+      const e1 = (i > 0) ? e.length + arrLeng[i - 1] : e.length;
+      arrLeng.push(e1); // формирую массив суммарных длин строк, без переноса
+      if (e1 + i < this.cursor) rowArea++; // нахожу строку в которой сейчас курсор
+    });
+    let posRow; // длина, на которую нужно сместиться, если следующая строка длинее
+    if (keyCode === 'ArrowDown') {
+      posRow = arr[rowArea].length; // длина текущей строки
+      cursorNew += posRow + 1; // вычисляю новую позицию курсора
+      if (cursorNew > arrLeng[rowArea + 1]) cursorNew = arrLeng[rowArea + 1] + rowArea + 1; // меняю позицию курсора, если следующая строка короче
+    }
+    if (keyCode === 'ArrowUp') {
+      posRow = (rowArea > 0) ? arr[rowArea - 1].length : 0; // длина предыдущей строки
+      cursorNew -= posRow + 1;
+      if (cursorNew > arrLeng[rowArea - 1]) cursorNew = arrLeng[rowArea - 1] + rowArea - 1;
+    }
+    this.cursor = cursorNew;
   }
 
   // заполнение textarea
@@ -227,15 +250,16 @@ export default class KeyboardV {
         this.area.selectionEnd -= 1;
         break;
       case 'ArrowUp':
-        this.area.selectionStart = 0;
-        this.area.selectionEnd = this.area.selectionStart;
+        this.arrowArea(keyCode);
+        this.area.selectionStart = this.cursor;
+        this.area.selectionEnd = this.cursor;
         break;
       case 'ArrowRight':
         this.area.selectionStart += 1;
         break;
       case 'ArrowDown':
-        this.area.selectionEnd = this.area.textLength;
-        this.area.selectionStart = this.area.selectionEnd;
+        this.arrowArea(keyCode);
+        this.area.selectionStart = this.cursor;
         break;
       case 'CapsLock':
         this.capsClick = !this.capsClick;
