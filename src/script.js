@@ -55,6 +55,9 @@ export default class KeyboardV {
             this.shiftKey = keyCode;
           }
           keyActive.classList.add('active');
+          if (keyCode === 'CapsLock') {
+            if (this.capsClick) keyActive.classList.remove('active');
+          }
           this.print(keyCode, key);
         }
       }
@@ -62,12 +65,17 @@ export default class KeyboardV {
 
     // клавиатура отпускание
     document.addEventListener('keyup', (event) => {
-      const keyActive = document.querySelector(`.key[data-key="${event.code}"]`);
-      if (event.code === 'ShiftLeft' || event.code === 'ShiftRight') {
+      const keyCode = event.code;
+      const keyActive = document.querySelector(`.key[data-key="${keyCode}"]`);
+      if (keyCode === 'ShiftLeft' || keyCode === 'ShiftRight') {
         this.shiftClick = false;
         this.build();
       }
       if (keyActive) keyActive.classList.remove('active');
+      if (event.code === 'CapsLock') {
+        if (!this.capsClick) keyActive.classList.add('active');
+        this.print(keyCode);
+      }
     });
   }
 
@@ -81,24 +89,27 @@ export default class KeyboardV {
         let key;
         this.keyArr.push(item.code);
         let keyClass = (item.class) ? `key ${item.class}` : 'key';
-        console.log(this.capsClick);
+
         if (this.capsClick || this.shiftClick) {
           if (item.shift) key = item.shift[this.lang];
           else if (item.class) key = item.key;
           else key = (item.keyLang) ? item.keyLang[this.lang].toUpperCase() : item.key.toUpperCase();
           if (this.capsClick) {
-            if (item.code === 'CapsLock') keyClass += ' active';
+            if (item.code === 'CapsLock') {
+              keyClass += ' active';
+            }
           } else if (item.code === this.shiftKey) {
             keyClass += ' active';
           }
         } else {
           key = (item.keyLang) ? item.keyLang[this.lang] : item.key;
         }
-
         out += `<div class="${keyClass}" data-key=${item.code}><i>${key}</i></div>`;
       });
     });
+    console.log(out);
     keyboardVirtual.innerHTML = out;
+    console.log(keyboardVirtual);
     this.area = document.querySelector('.text');
     this.keyboardKey = document.querySelectorAll('.keyboard .key');
     this.setMouseClick();
@@ -117,6 +128,7 @@ export default class KeyboardV {
           if (this.altClick) {
             setTimeout(() => {
               this.keyboardKey.forEach((e) => e.classList.remove('active'));
+              this.capsOn();
             }, 300);
           }
         } else if (keyCode === 'AltLeft') {
@@ -124,6 +136,7 @@ export default class KeyboardV {
           if (this.ctrlClick) {
             setTimeout(() => {
               this.keyboardKey.forEach((e) => e.classList.remove('active'));
+              this.capsOn();
             }, 300);
           }
         } else if (keyCode === 'ShiftLeft' || keyCode === 'ShiftRight') {
@@ -142,15 +155,19 @@ export default class KeyboardV {
           }, 300);
         }
 
-        if (this.capsClick) {
-          document.querySelector('.key[data-key="CapsLock"]').classList.add('active');
-        }
+        this.capsOn();
 
         setTimeout(() => {
           this.print(keyCode, key);
         }, 200);
       });
     });
+  }
+
+  capsOn() {
+    if (this.capsClick) {
+      document.querySelector('.key[data-key="CapsLock"]').classList.add('active');
+    }
   }
 
   // заполнение textarea
