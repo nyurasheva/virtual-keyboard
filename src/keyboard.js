@@ -136,7 +136,7 @@ const keyboard = [
   [
     {
       code: 'CapsLock',
-      key: '🅰 Caps Lock',
+      key: '🅰 Caps',
       class: 'caps',
     },
     {
